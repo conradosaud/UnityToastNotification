@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7001399534701900153}
   m_Layer: 5
-  m_Name: Message
+  m_Name: DefaultMessageModel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

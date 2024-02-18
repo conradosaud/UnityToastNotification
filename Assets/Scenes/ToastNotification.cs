@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +18,8 @@ public class ToastNotification : MonoBehaviour
     {
 
         messages = new List<Transform>();
-        Show("Texto de testes aqui", "Info", false);
+        Show("Texto de testes aqui", 3, "info", false);
+        messagePrefab.gameObject.SetActive(false);
 
     }
 
@@ -26,11 +28,12 @@ public class ToastNotification : MonoBehaviour
         elapsedTime += Time.deltaTime;
     }
 
-    public void Show( string messageText, string iconName = "", bool darkTheme = true, int timerInSeconds = 3 )
+    public void Show( string messageText, int timerInSeconds = 3, string iconName = "", bool darkTheme = true )
     {
 
         Transform canvas = transform.parent;
         Transform message = Instantiate(messagePrefab, canvas);
+        message.gameObject.SetActive(true);
 
         TextMeshProUGUI text = message.Find("Text").GetComponent<TextMeshProUGUI>();
         Image background = message.Find("Background").GetComponent<Image>();
@@ -42,7 +45,7 @@ public class ToastNotification : MonoBehaviour
         Image selectedIcon = null;
         if( iconName != "")
         {
-            //iconName = iconName.Substring(0,1).ToUpper() + iconName.Substring(1).ToLower();
+            iconName = Capitalize(iconName);
             selectedIcon = icons.Find(iconName).transform.GetComponent<Image>();
             selectedIcon.enabled = true;
         }
@@ -55,9 +58,13 @@ public class ToastNotification : MonoBehaviour
             foreColor = new Color(0.26f, 0.26f, 0.26f, 1);
             backgroundColor = new Color(255, 255, 255, 0.78f);
         }
+        // SecondaryColor (timer element) is based on foreColor
+        Color secondaryColor = foreColor;
+        secondaryColor.a = 0.39f;
 
         text.color = foreColor;
         background.color = backgroundColor;
+        timer.color = secondaryColor;
         if (selectedIcon != null)
             selectedIcon.color = foreColor;
 
@@ -69,6 +76,18 @@ public class ToastNotification : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
         Destroy(message);
+    }
+
+    string Capitalize( string text )
+    {
+        // Verifica se a string é nula ou vazia
+        if (string.IsNullOrEmpty(text))
+        {
+            return text;
+        }
+
+        // Converte a primeira letra para maiúscula e as demais para minúscula
+        return char.ToUpper(text[0]) + text.Substring(1).ToLower();
     }
 
 }
