@@ -11,21 +11,18 @@ public class ToastNotification : MonoBehaviour
 
     static List<Transform> messages;
     public Transform messagePrefab;
+    public bool showTimerRender = true;
 
-    float elapsedTime = 0;
+    public static bool isStoped = false;
+    public static float minimunMessageTime = 3;
 
     void Start()
     {
 
         messages = new List<Transform>();
-        Show("Texto de testes aqui", 3, "info", false);
+        Show("Texto de testes aqui", 3, "info");
         messagePrefab.gameObject.SetActive(false);
 
-    }
-
-    void FixedUpdate()
-    {
-        elapsedTime += Time.deltaTime;
     }
 
     public void Show( string messageText, int timerInSeconds = 3, string iconName = "", bool darkTheme = true )
@@ -33,7 +30,7 @@ public class ToastNotification : MonoBehaviour
 
         Transform canvas = transform.parent;
         Transform message = Instantiate(messagePrefab, canvas);
-        message.gameObject.SetActive(true);
+        message.gameObject.SetActive(true);        
 
         TextMeshProUGUI text = message.Find("Text").GetComponent<TextMeshProUGUI>();
         Image background = message.Find("Background").GetComponent<Image>();
@@ -68,15 +65,20 @@ public class ToastNotification : MonoBehaviour
         if (selectedIcon != null)
             selectedIcon.color = foreColor;
 
-        StartCoroutine( Hide( message.gameObject, timerInSeconds) );
+
+        ToastNotificationMessage toastNotificationMessage = message.GetComponent<ToastNotificationMessage>();
+        toastNotificationMessage.timerRectTransform = timer.GetComponent<RectTransform>();
+        toastNotificationMessage.messageTime = timerInSeconds;
+
+        timer.enabled = showTimerRender;
 
     }
 
-    IEnumerator Hide( GameObject message, int time )
-    {
-        yield return new WaitForSeconds(time);
-        Destroy(message);
-    }
+    #region Utilities Functions
+
+/* *********************************
+*              Utilities
+* *********************************/
 
     string Capitalize( string text )
     {
@@ -89,5 +91,7 @@ public class ToastNotification : MonoBehaviour
         // Converte a primeira letra para maiúscula e as demais para minúscula
         return char.ToUpper(text[0]) + text.Substring(1).ToLower();
     }
+
+    #endregion
 
 }
