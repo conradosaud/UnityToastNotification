@@ -9,15 +9,24 @@ public class ToastNotificationMessage : MonoBehaviour
     [HideInInspector]
     public RectTransform timerRectTransform;
     [HideInInspector]
-    bool leftToRight = true;
+    public bool leftToRight = true;
 
     private float initialWidth; // Largura inicial do timer
     float timeElapsed;
 
     void Start()
     {
-        messageTime = messageTime <= 0 ? 0 : ToastNotification.minimunMessageTime;
-        initialWidth = timerRectTransform.rect.width;
+        messageTime = messageTime <= 0 ? ToastNotification.static_minimumMessageTime : messageTime;
+
+        RectTransform messageRect = transform.parent.GetComponent<RectTransform>();
+        timerRectTransform.sizeDelta = new Vector2(messageRect.sizeDelta.x, messageRect.sizeDelta.y * 0.07f );
+
+        timerRectTransform.anchorMin = new Vector2(1,1);
+        timerRectTransform.anchorMax = new Vector2(1,1);
+        timerRectTransform.pivot = new Vector2(1,1);
+        timerRectTransform.anchoredPosition = Vector3.zero;
+
+        initialWidth = timerRectTransform.sizeDelta.x;
     }
 
     void FixedUpdate()
@@ -44,23 +53,23 @@ public class ToastNotificationMessage : MonoBehaviour
         // Calcula a nova largura do timer com base na porcentagem do tempo restante
         float newWidth = initialWidth * remainingTimePercentage;
 
-        float newXPosition = (initialWidth - newWidth) / 2f;
-        timerRectTransform.sizeDelta = new Vector2(-newWidth, timerRectTransform.sizeDelta.y);
-
+        timerRectTransform.sizeDelta = new Vector2(newWidth, timerRectTransform.sizeDelta.y);
         if (leftToRight == false)
         {
-            newXPosition = -(initialWidth - newWidth) / 2f;
-            timerRectTransform.sizeDelta = new Vector2(newWidth, timerRectTransform.sizeDelta.y);
+            timerRectTransform.anchoredPosition = new Vector2(-initialWidth + timerRectTransform.sizeDelta.x, timerRectTransform.anchoredPosition.y );
         }
 
-        // Define a nova largura e posição X do timer
-        timerRectTransform.sizeDelta = new Vector2(newWidth, timerRectTransform.sizeDelta.y);
-        timerRectTransform.anchoredPosition = new Vector2(newXPosition, timerRectTransform.anchoredPosition.y);
     }
 
-    void Hide()
+    public void Hide()
     {
         Destroy(gameObject);
+    }
+
+    public void HideOnClick()
+    {
+        if (ToastNotification.static_hideOnClick)
+            Hide();
     }
 
 }
