@@ -16,7 +16,7 @@ public class ToastNotificationMessage : MonoBehaviour
 
     void Start()
     {
-        messageTime = messageTime <= 0 ? ToastNotification.static_minimumMessageTime : messageTime;
+        messageTime = messageTime <= 0 ? ToastNotification.minimumMessageTime : messageTime;
 
         RectTransform messageRect = transform.parent.GetComponent<RectTransform>();
         timerRectTransform.sizeDelta = new Vector2(messageRect.sizeDelta.x, messageRect.sizeDelta.y * 0.07f );
@@ -68,7 +68,7 @@ public class ToastNotificationMessage : MonoBehaviour
 
     public void HideOnClick()
     {
-        if (ToastNotification.static_hideOnClick)
+        if (ToastNotification.hideOnClick)
             Hide();
     }
 

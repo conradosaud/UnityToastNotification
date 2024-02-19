@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,68 +17,95 @@ using UnityEngine.UIElements;
 public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
 
-    static List<Transform> messages;
-    public Transform messagePrefab;
 
     /// <summary>
     /// Especificações do default
     /// </summary>
     /// 
-    
-    [Header("Default Messages Patterns:")]
-    [Tooltip("A countdown image will be displayed on message like a timer")]
-    public bool showTimerRender = true;
-    [Tooltip("All messages will be displayed on right top corner of screen. Disabled it to show on LEFT top corner.")]
-    public bool rightTopCorner = true;
-    [Tooltip("Disable it to use Light Theme on messages")]
-    public bool darkTheme = true;
-    [Tooltip("Minimun time that all messages will be displayed.")]
-    public float minimumMessageTime = 3;
-    [Tooltip("Margin X and Y on the corners. Margin X doens't works with centralized messages.")]
-    public Vector2 margin = new Vector2(20, 20);
-    [Tooltip("Stop the timer when mouse cursor is over the ToastNotification component")]
-    public bool stopOnOver = true;
-    [Tooltip("Hide the message when it's clicked")]
-    public bool hideOnClick = true;
 
-    public float tempoDEV = 300;
+    public Transform _messagePrefab;
 
     public static bool isStoped = false;
+    private static Transform messagePrefab;
+    private static Transform toastNotification;
+    private static bool showTimerRender;
+    private static TimerDirection timerDirection;
+    private static MessageScreenPosition messageScreenPosition;
+    private static Vector2 margin;
+    private static bool darkTheme;
+    public static float minimumMessageTime = 3;
+    public static bool hideOnClick = true;
 
-    // Static variables don't show on Unity Editor
-    public static float static_minimumMessageTime = 3;
-    public static bool static_hideOnClick = true;
+    /* 
+     * Variáveis públicas são definidas com o prefixo underline (_) antes delas 
+     * Dessa forma, as variáveis estáticas que serão realmente usadas no código
+     *      podem usar o nome das variáveis públicas e fazer seu trabalho
+     */
 
+    [Header("Default Messages Patterns:")]
+    [Tooltip("A countdown image will be displayed on message like a timer")]
+    public bool _showTimerRender = true;
+    [Tooltip("Disable it to use Light Theme on messages")]
+    public bool _darkTheme = true;
+    [Tooltip("Minimun time that all messages will be displayed.")]
+    public float _minimumMessageTime = 3;
+    [Tooltip("Margin X and Y on the corners. Margin X doens't works with centralized messages.")]
+    public Vector2 _margin = new Vector2(20, 20);
+    [Tooltip("Stop the timer when mouse cursor is over the ToastNotification component")]
+    public bool _stopOnOver = true;
+    [Tooltip("Hide the message when it's clicked")]
+    public bool _hideOnClick = true;
+
+    [Tooltip("Position of messages on screen")]
+    public enum MessageScreenPosition { TopLeft, TopCenter, TopRight, Center, BottomLeft, BottomCenter, BottomRight }
+    public MessageScreenPosition _messageScreenPosition = MessageScreenPosition.TopRight;
+    [Tooltip("Direction of timer countdown. Auto will choose the best position relative to the Message Screen Position option.")]
+    public enum TimerDirection { Auto, LeftToRight, RightToLeft}
+    public TimerDirection _timerDirection = TimerDirection.Auto;
+
+    public float tempoDEV = 300;
 
     void Start()
     {
 
-        static_minimumMessageTime = minimumMessageTime;
-        static_hideOnClick = hideOnClick;
 
-        messages = new List<Transform>();
+        minimumMessageTime = _minimumMessageTime;
+        hideOnClick = _hideOnClick;
+
+        messagePrefab = _messagePrefab;
+        toastNotification = transform;
+        darkTheme = _darkTheme;
+        showTimerRender = _showTimerRender;
+        timerDirection = _timerDirection;
+        messageScreenPosition = _messageScreenPosition;
+        margin = _margin;
+
         messagePrefab.gameObject.SetActive(false);
 
-        Show("Texto de testes aqui", tempoDEV, "info");
+        Show("Texto de testes aqui", tempoDEV, "info", darkTheme);
 
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if(stopOnOver)
+        if(_stopOnOver)
             isStoped = true;
     }
     public void OnPointerExit(PointerEventData eventData)
     {
-        if(stopOnOver)
+        if(_stopOnOver)
             isStoped = false;
     }
 
-    public void Show( string messageText, float timerInSeconds = 3, string iconName = "", bool darkTheme = true )
+    public static void Show( string messageText)
+    {
+        Show( messageText, minimumMessageTime, "info", darkTheme );
+    }
+
+    public static void Show( string messageText, float timerInSeconds, string iconName, bool darkTheme )
     {
 
-        //Transform canvas = transform.parent;
-        Transform message = Instantiate(messagePrefab, transform);
+        Transform message = Instantiate(messagePrefab, toastNotification);
         message.gameObject.SetActive(true);        
 
         TextMeshProUGUI text = message.Find("Text").GetComponent<TextMeshProUGUI>();
@@ -85,71 +114,118 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
         UnityEngine.UI.Image timer = message.Find("Timer").GetComponent<UnityEngine.UI.Image>();
 
         text.text = messageText;
-
         UnityEngine.UI.Image selectedIcon = null;
-        if( iconName != "")
-        {
-            iconName = Capitalize(iconName);
-            selectedIcon = icons.Find(iconName).transform.GetComponent<UnityEngine.UI.Image>();
-            selectedIcon.enabled = true;
-        }
-
-        // Dark theme default
-        Color foreColor = text.color = new Color(255, 255, 255, 1);
-        Color backgroundColor = new Color(0.26f, 0.26f, 0.26f, 0.78f);
-        if ( darkTheme == false )
-        {
-            foreColor = new Color(0.26f, 0.26f, 0.26f, 1);
-            backgroundColor = new Color(255, 255, 255, 0.78f);
-        }
-        // SecondaryColor (timer element) is based on foreColor
-        Color secondaryColor = foreColor;
-        secondaryColor.a = 0.39f;
-
-        text.color = foreColor;
-        background.color = backgroundColor;
-        timer.color = secondaryColor;
-        if (selectedIcon != null)
-            selectedIcon.color = foreColor;
-
-        
-        ToastNotificationMessage toastNotificationMessage = message.GetComponent<ToastNotificationMessage>();
-        toastNotificationMessage.timerRectTransform = timer.GetComponent<RectTransform>();
-        toastNotificationMessage.messageTime = timerInSeconds;
-
-        toastNotificationMessage.leftToRight = rightTopCorner;
-        timer.enabled = showTimerRender;
-
-        RectTransform parentRect = GetComponent<RectTransform>();
-        parentRect.anchoredPosition = Vector3.zero;
 
         Vector2 backgroundSize = background.GetComponent<RectTransform>().sizeDelta;
-        message.GetComponent<RectTransform>().sizeDelta = backgroundSize;
-        parentRect.sizeDelta = backgroundSize;
+        RectTransform parentRect = toastNotification.GetComponent<RectTransform>();
 
-        if( rightTopCorner == true)
+        SetMessageIcon();
+        SetMessageColor();
+        SetupInvokeMessage();
+        ResetToastNoticationPosition();
+        SetMessagePositionOnScreen();
+
+        void SetMessageIcon()
         {
-            parentRect.anchorMax = new Vector2(1, 1);
-            parentRect.anchorMin = new Vector2(1, 1);
-            parentRect.anchoredPosition = new Vector2( -backgroundSize.x - margin.x , -backgroundSize.y - margin.y ) ;
+            
+            if( iconName != "")
+            {
+                iconName = Capitalize(iconName);
+                selectedIcon = icons.Find(iconName).transform.GetComponent<UnityEngine.UI.Image>();
+                selectedIcon.enabled = true;
+            }
         }
-        else
+
+        void SetMessageColor()
         {
-            parentRect.anchorMax = new Vector2(0, 1);
-            parentRect.anchorMin = new Vector2(0, 1);
-            parentRect.anchoredPosition = new Vector2( margin.x , -backgroundSize.y - margin.y );
+            // Dark theme default
+            Color foreColor = text.color = new Color(255, 255, 255, 1);
+            Color backgroundColor = new Color(0.26f, 0.26f, 0.26f, 0.78f);
+            if (darkTheme == false)
+            {
+                foreColor = new Color(0.26f, 0.26f, 0.26f, 1);
+                backgroundColor = new Color(255, 255, 255, 0.78f);
+            }
+            // SecondaryColor (timer element) is based on foreColor
+            Color secondaryColor = foreColor;
+            secondaryColor.a = 0.39f;
+
+            text.color = foreColor;
+            background.color = backgroundColor;
+            timer.color = secondaryColor;
+            if (selectedIcon != null)
+                selectedIcon.color = foreColor;
         }
 
+        void SetupInvokeMessage()
+        {
+            ToastNotificationMessage toastNotificationMessage = message.GetComponent<ToastNotificationMessage>();
+            toastNotificationMessage.timerRectTransform = timer.GetComponent<RectTransform>();
+            toastNotificationMessage.messageTime = timerInSeconds;
 
+            timer.enabled = showTimerRender;
+            toastNotificationMessage.leftToRight = timerDirection == TimerDirection.LeftToRight;
+            if (timerDirection == TimerDirection.Auto)
+                toastNotificationMessage.leftToRight = messageScreenPosition != MessageScreenPosition.TopLeft || messageScreenPosition != MessageScreenPosition.BottomLeft;
 
+        }
 
-        //transform.position = Vector3.zero;
-        //novo.y = Screen.height - message.GetComponent<RectTransform>().sizeDelta.y / 2;
-        //novo.x = Screen.width - message.GetComponent<RectTransform>().sizeDelta.x*2 - message.GetComponent<RectTransform>().sizeDelta.x;
-        //message.position = novo - margin;
+        void ResetToastNoticationPosition()
+        {
+            parentRect.anchoredPosition = Vector3.zero;
+
+            message.GetComponent<RectTransform>().sizeDelta = backgroundSize;
+            parentRect.sizeDelta = backgroundSize;
+        }
+        
+        void SetMessagePositionOnScreen()
+        {
+
+            RectTransform parentRect = toastNotification.GetComponent<RectTransform>();
+            Vector2 backgroundSize = background.GetComponent<RectTransform>().sizeDelta;
+
+            if (messageScreenPosition == MessageScreenPosition.TopLeft)
+            {
+                parentRect.anchorMax = new Vector2(0, 1);
+                parentRect.anchorMin = new Vector2(0, 1);
+                parentRect.anchoredPosition = new Vector2(margin.x, -backgroundSize.y - margin.y);
+            }
+            else if (messageScreenPosition == MessageScreenPosition.TopRight)
+            {
+                parentRect.anchorMax = new Vector2(1, 1);
+                parentRect.anchorMin = new Vector2(1, 1);
+                parentRect.anchoredPosition = new Vector2(-backgroundSize.x - margin.x, -backgroundSize.y - margin.y);
+            }
+            else if (messageScreenPosition == MessageScreenPosition.TopCenter)
+            {
+                parentRect.anchorMax = new Vector2(0.5f, 1);
+                parentRect.anchorMin = new Vector2(0.5f, 1);
+                parentRect.anchoredPosition = new Vector2(-backgroundSize.x / 2, -backgroundSize.y - margin.y);
+            }
+            else if (messageScreenPosition == MessageScreenPosition.BottomLeft)
+            {
+                parentRect.anchorMax = new Vector2(0, 0);
+                parentRect.anchorMin = new Vector2(0, 0);
+                parentRect.anchoredPosition = new Vector2(margin.x, margin.y);
+            }
+            else if (messageScreenPosition == MessageScreenPosition.BottomRight)
+            {
+                parentRect.anchorMax = new Vector2(1, 0);
+                parentRect.anchorMin = new Vector2(1, 0);
+                parentRect.anchoredPosition = new Vector2(-backgroundSize.x - margin.x, margin.y);
+            }
+            else // Center
+            {
+                parentRect.anchorMax = new Vector2(0.5f, 0.5f);
+                parentRect.anchorMin = new Vector2(0.5f, 0.5f);
+                parentRect.anchoredPosition = new Vector2(-backgroundSize.x / 2, -backgroundSize.y / 2);
+            }
+        }
 
 
     }
+
+   
 
     #region Utilities Functions
 
@@ -169,7 +245,7 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
         }
     }
 
-    string Capitalize( string text )
+    static string Capitalize( string text )
     {
         // Verifica se a string é nula ou vazia
         if (string.IsNullOrEmpty(text))
