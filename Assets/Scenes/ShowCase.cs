@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // Hey! If you use this code, you can invoke ToastNotification just writing Show instead ToastNotification.Show ^_~
 using static ToastNotification;
@@ -39,13 +40,34 @@ public class ShowCase : MonoBehaviour
         ToastNotification.Show("If timer is zero, this message will be infinite... or until you click to hide XD", 0 );
     }
 
-    /* Pressets Messages */
+    /* Custom Messages Secene */
 
-    public void ShowMessageLightTheme()
+    public void ShowMessageNewSetup()
     {
-        ToastNotification.ShowSmall("This is a Light Theme example message, but you can change the background. Check the docs!");
+        ToastNotification.Show("This is a Light Theme example message, but you can change the background. Check the docs!");
     }
 
-    /* SetMessagePosition */
+    public void ShowCenterMsg()
+    {
+        ToastNotification.messageScreenPosition = ToastNotification.MessageScreenPosition.Center;
+        ToastNotification.Show("This is a Light Theme example message, but you can change the background. Check the docs!");
+    }
+
+    public void LeftBottomAndDark()
+    {
+        ToastNotification.messageScreenPosition = ToastNotification.MessageScreenPosition.BottomRight;
+        ToastNotification.darkTheme = true;
+        ToastNotification.Show("This is a Light Theme example message, but you can change the background. Check the docs!");
+    }
+
+    /* Scene manager */
+    public void BackToHome()
+    {
+        SceneManager.LoadScene("ShowCase");
+    }
+    public void GoToCustom()
+    {
+        SceneManager.LoadScene("CustomMessages");
+    }
 
 }

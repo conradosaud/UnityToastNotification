@@ -32,9 +32,9 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
     private static bool showTimerRender;
     private static TimerDirection timerDirection;
     private static MessageSize messageSize;
-    private static MessageScreenPosition messageScreenPosition;
+    public static MessageScreenPosition messageScreenPosition;
     private static Vector2 margin;
-    private static bool darkTheme;
+    public static bool darkTheme;
     public static float minimumMessageTime = 3;
     public static bool hideOnClick = true;
     private static float icon_size = 90;
