@@ -35,13 +35,18 @@ public class ToastNotificationMessage : MonoBehaviour
         if (ToastNotification.isStoped == true)
             return;
 
-        if (timeElapsed > messageTime)
-            Hide();
+        // Inifite message
+        if( messageTime != 0)
+        {
+            if (timeElapsed > messageTime)
+                ToastNotification.isHiding = true;
+                //ToastNotification.Hide();
         
 
-        timeElapsed += Time.deltaTime;
+            timeElapsed += Time.deltaTime;
 
-        RenderTimer();
+            RenderTimer();
+        }
 
     }
 
@@ -61,15 +66,10 @@ public class ToastNotificationMessage : MonoBehaviour
 
     }
 
-    public void Hide()
-    {
-        Destroy(gameObject);
-    }
-
-    public void HideOnClick()
+    public static void HideOnClick()
     {
         if (ToastNotification.hideOnClick)
-            Hide();
+            ToastNotification.Hide();
     }
 
 }
