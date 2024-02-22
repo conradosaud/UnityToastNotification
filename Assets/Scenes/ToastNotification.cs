@@ -37,7 +37,8 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
     public static bool darkTheme;
     public static float minimumMessageTime = 3;
     public static bool hideOnClick = true;
-    private static float icon_size = 90;
+    private static float icon_size = 60;
+    public static bool smallMessages = false;
 
     public static bool isHiding = false;
 
@@ -67,7 +68,7 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
     [Tooltip("Direction of timer countdown. Auto will choose the best position relative to the Message Screen Position option.")]
     public enum TimerDirection { Auto, LeftToRight, RightToLeft}
     public TimerDirection _timerDirection = TimerDirection.Auto;
-    [Tooltip("Direction of timer countdown. Auto will choose the best position relative to the Message Screen Position option.")]
+    [Tooltip("Set all messages to be 60% smaller on screen. ShowSmall won't works anymore.")]
     public enum MessageSize { Normal, Small }
     public MessageSize _messageSize = MessageSize.Normal;
 
@@ -212,13 +213,15 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
         {
             if (messageSize != MessageSize.Normal || small == true)
             {
+                float margin = backgroundSize.x / 2f;
                 text.GetComponent<RectTransform>().sizeDelta = new Vector2(backgroundSize.x / 2f, backgroundSize.y / 2);
-                text.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
-                text.fontSize = text.fontSize / 2;
-                backgroundSize = new Vector2(backgroundSize.x / 1.5f, backgroundSize.y / 2);
+                margin -= text.GetComponent<RectTransform>().sizeDelta.x;
+                text.GetComponent<RectTransform>().anchoredPosition = new Vector2( -margin, 0) ;
+                text.fontSize = text.fontSize / 1.5f;
+                backgroundSize = new Vector2(backgroundSize.x / 1.5f, backgroundSize.y / 1.5f);
                 background.GetComponent<RectTransform>().sizeDelta = backgroundSize;
                 toastNotification.GetComponent<RectTransform>().anchoredPosition = backgroundSize;
-                customIconSize = customIconSize / 2.5f;
+                customIconSize = customIconSize / 2f;
             }
         }
 
@@ -231,7 +234,7 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
                 selectedIcon.enabled = true;
                 selectedIcon.GetComponent<RectTransform>().sizeDelta = new Vector2(customIconSize, customIconSize);
                 if (messageSize != MessageSize.Normal || small == true)
-                    selectedIcon.GetComponent<RectTransform>().anchoredPosition = new Vector2(-backgroundSize.x / 2 + customIconSize, 0);
+                    selectedIcon.GetComponent<RectTransform>().anchoredPosition = new Vector2(-backgroundSize.x / 2f + customIconSize, 0);
             }
             else
             {
@@ -262,7 +265,10 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
             background.color = backgroundColor;
             timer.color = secondaryColor;
             if (selectedIcon != null)
-                selectedIcon.color = foreColor;
+            {
+                selectedIcon.color = new Color( foreColor.r, foreColor.g, foreColor.b, 0.7f );
+            }
+            
         }
 
         void SetupInvokeMessage()
