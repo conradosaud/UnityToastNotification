@@ -24,35 +24,35 @@ public class ShowCase : MonoBehaviour
 
     public void ShowMessageDefault()
     {
-        ToastNotification.Show("What you think about this messages? Looks good, dont?", 3, "info");
+        ToastNotification.Show("Hey there! How do you like this message? Pretty cool, huh?", 3, "info");
     }
     public void ShowMessageWhitoutIcon()
     {
-        ToastNotification.Show("You dont need to use icons if you dont want it.");
+        ToastNotification.Show("You don't have to use the icons if you don't want to");
     }
     public void ShowMessageWithoutTimer()
     {
-        ToastNotification.Show("If timer is zero, this message will be infinite... or until you click to hide XD", 0 );
+        ToastNotification.Show("If the timer hits zero, this message will be infinite... or until you click to close it", 0, "success" );
     }
 
     /* Custom Messages Secene */
 
     public void ShowMessageNewSetup()
     {
-        ToastNotification.Show("This is a Light Theme example message, but you can change the background. Check the docs!");
+        ToastNotification.Show("You can go for the light theme, but feel free to spice up your messages too!");
     }
 
     public void ShowCenterMsg()
     {
         ToastNotification.messageScreenPosition = ToastNotification.MessageScreenPosition.Center;
-        ToastNotification.Show("This is a Light Theme example message, but you can change the background. Check the docs!");
+        ToastNotification.Show("Messages in the center are cool, but be careful with the opacity, it can get in the way");
     }
 
     public void LeftBottomAndDark()
     {
         ToastNotification.messageScreenPosition = ToastNotification.MessageScreenPosition.BottomRight;
         ToastNotification.darkTheme = true;
-        ToastNotification.Show("This is a Light Theme example message, but you can change the background. Check the docs!");
+        ToastNotification.Show("And remember, if the messages start talking back to you, it might be time for a coffee break!");
     }
 
     /* Scene manager */
