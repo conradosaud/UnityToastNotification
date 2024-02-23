@@ -26,11 +26,6 @@ public class ShowCase : MonoBehaviour
     {
         ToastNotification.Show("What you think about this messages? Looks good, dont?", 3, "info");
     }
-    public void ShowMessageSmall()
-    {
-        //ToastNotification.SetMessagePosition( MessageScreenPosition.TopLeft );
-        ToastNotification.ShowSmall("Pretty small message :)", "success");
-    }
     public void ShowMessageWhitoutIcon()
     {
         ToastNotification.Show("You dont need to use icons if you dont want it.");

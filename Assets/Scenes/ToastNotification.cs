@@ -31,14 +31,11 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
     private static Transform toastNotification;
     private static bool showTimerRender;
     private static TimerDirection timerDirection;
-    private static MessageSize messageSize;
     public static MessageScreenPosition messageScreenPosition;
     private static Vector2 margin;
     public static bool darkTheme;
     public static float minimumMessageTime = 3;
     public static bool hideOnClick = true;
-    private static float icon_size = 60;
-    public static bool smallMessages = false;
 
     public static bool isHiding = false;
 
@@ -68,9 +65,6 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
     [Tooltip("Direction of timer countdown. Auto will choose the best position relative to the Message Screen Position option.")]
     public enum TimerDirection { Auto, LeftToRight, RightToLeft}
     public TimerDirection _timerDirection = TimerDirection.Auto;
-    [Tooltip("Set all messages to be 60% smaller on screen. ShowSmall won't works anymore.")]
-    public enum MessageSize { Normal, Small }
-    public MessageSize _messageSize = MessageSize.Normal;
 
     public int limitOnScreen = 5;
 
@@ -84,15 +78,11 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
         toastNotification = transform;
         darkTheme = _darkTheme;
         showTimerRender = _showTimerRender;
-        messageSize = _messageSize;
         timerDirection = _timerDirection;
         messageScreenPosition = _messageScreenPosition;
         margin = _margin;
 
         _messagePrefab.gameObject.SetActive(false);
-
-        //Show("Texto de testes aqui", tempoDEV, "info", darkTheme);
-        Show("Minha mensagem aqui hihih", false, minimumMessageTime, "Alert");
 
     }
 
@@ -128,52 +118,30 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
 
     // Message text is the minimun necessary
-    public static void Show( string messageText)
+    public static void Show(string messageText)
     {
-        Show( messageText, false, minimumMessageTime, "" );
+        Show(messageText, minimumMessageTime, "");
     }
     // Text and timer only
     public static void Show(string messageText, float timerInSeconds)
     {
-        Show(messageText, false, timerInSeconds, "");
+        Show(messageText, timerInSeconds, "");
     }
     // Text and icon only
     public static void Show(string messageText, string iconName)
     {
-        Show(messageText, false, minimumMessageTime, iconName);
-    }
-    // Text, timer and icon
-    public static void Show(string messageText, float timerInSeconds, string iconName)
-    {
-        Show(messageText, false, timerInSeconds, iconName);
+        Show(messageText, minimumMessageTime, iconName);
     }
 
-    // SMALL MESSAGE - Message text is the minimun necessary
-    // Message text is the minimun necessary
-    public static void ShowSmall(string messageText)
-    {
-        Show(messageText, true, 300, "");
-    }
-    // Text and timer only
-    public static void ShowSmall(string messageText, float timerInSeconds)
-    {
-        Show(messageText, true, timerInSeconds, "");
-    }
-    // Text and icon only
-    public static void ShowSmall(string messageText, string iconName)
-    {
-        Show(messageText, true, minimumMessageTime, iconName);
-    }
-    // Text, timer and icon
-    public static void ShowSmall(string messageText, float timerInSeconds, string iconName)
-    {
-        Show(messageText, true, timerInSeconds, iconName);
-    }
-
-    public static void Show( string messageText, bool small, float timerInSeconds, string iconName)
+    public static void Show( string messageText, float timerInSeconds = -1, string iconName = "")
     {
 
         Hide();
+
+        if( timerInSeconds <= -1)
+        {
+            timerInSeconds = minimumMessageTime;
+        }
 
         Transform message = Instantiate(messagePrefab, toastNotification);
         message.gameObject.SetActive(true);
@@ -188,10 +156,8 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
         Vector2 backgroundSize = background.GetComponent<RectTransform>().sizeDelta;
         RectTransform parentRect = toastNotification.GetComponent<RectTransform>();
-        float customIconSize = icon_size;
 
         SetText();
-        SetMessageSize();
         SetMessageIcon();
         SetMessageColor();
         SetupInvokeMessage();
@@ -201,28 +167,15 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
         void SetText()
         {
             text.text = messageText;
-            if (messageScreenPosition == MessageScreenPosition.TopLeft || messageScreenPosition == MessageScreenPosition.BottomLeft)
-                text.alignment = TextAlignmentOptions.MidlineRight;
-            else if(messageScreenPosition == MessageScreenPosition.TopRight || messageScreenPosition == MessageScreenPosition.BottomRight)
-                text.alignment = TextAlignmentOptions.MidlineLeft;
-            else
+            text.alignment = TextAlignmentOptions.MidlineLeft;
+            if( messageScreenPosition == MessageScreenPosition.Center )
                 text.alignment = TextAlignmentOptions.Center;
-        }
-
-        void SetMessageSize()
-        {
-            if (messageSize != MessageSize.Normal || small == true)
-            {
-                float margin = backgroundSize.x / 2f;
-                text.GetComponent<RectTransform>().sizeDelta = new Vector2(backgroundSize.x / 2f, backgroundSize.y / 2);
-                margin -= text.GetComponent<RectTransform>().sizeDelta.x;
-                text.GetComponent<RectTransform>().anchoredPosition = new Vector2( -margin, 0) ;
-                text.fontSize = text.fontSize / 1.5f;
-                backgroundSize = new Vector2(backgroundSize.x / 1.5f, backgroundSize.y / 1.5f);
-                background.GetComponent<RectTransform>().sizeDelta = backgroundSize;
-                toastNotification.GetComponent<RectTransform>().anchoredPosition = backgroundSize;
-                customIconSize = customIconSize / 2f;
-            }
+            //if (messageScreenPosition == MessageScreenPosition.TopLeft || messageScreenPosition == MessageScreenPosition.BottomLeft)
+            //    text.alignment = TextAlignmentOptions.MidlineRight;
+            //else if(messageScreenPosition == MessageScreenPosition.TopRight || messageScreenPosition == MessageScreenPosition.BottomRight)
+            //    text.alignment = TextAlignmentOptions.MidlineLeft;
+            //else
+            //    text.alignment = TextAlignmentOptions.Center;
         }
 
         void SetMessageIcon()
@@ -232,16 +185,14 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
                 iconName = Capitalize(iconName);
                 selectedIcon = icons.Find(iconName).transform.GetComponent<UnityEngine.UI.Image>();
                 selectedIcon.enabled = true;
-                selectedIcon.GetComponent<RectTransform>().sizeDelta = new Vector2(customIconSize, customIconSize);
-                if (messageSize != MessageSize.Normal || small == true)
-                    selectedIcon.GetComponent<RectTransform>().anchoredPosition = new Vector2(-backgroundSize.x / 2f + customIconSize, 0);
             }
             else
             {
-                backgroundSize = new Vector2( backgroundSize.x - customIconSize - customIconSize / 2 , backgroundSize.y);
+                float iconSize = icons.GetChild(0).GetComponent<RectTransform>().sizeDelta.x;
+                backgroundSize = new Vector2( backgroundSize.x - iconSize - iconSize / 2 , backgroundSize.y);
                 background.GetComponent<RectTransform>().sizeDelta = backgroundSize;
                 Vector2 newAnchor = background.GetComponent<RectTransform>().anchoredPosition;
-                newAnchor = new Vector2(newAnchor.x - customIconSize, newAnchor.y);
+                newAnchor = new Vector2(newAnchor.x - iconSize, newAnchor.y);
                 toastNotification.GetComponent<RectTransform>().anchoredPosition = newAnchor;
                 text.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
             }
@@ -280,9 +231,9 @@ public class ToastNotification : MonoBehaviour, IPointerEnterHandler, IPointerEx
             timer.enabled = showTimerRender;
             timer.enabled = timerInSeconds == 0 ? false : timer.enabled;
 
-            toastNotificationMessage.leftToRight = timerDirection == TimerDirection.LeftToRight;
             if (timerDirection == TimerDirection.Auto)
                 toastNotificationMessage.leftToRight = messageScreenPosition != MessageScreenPosition.TopLeft || messageScreenPosition != MessageScreenPosition.BottomLeft;
+            toastNotificationMessage.leftToRight = timerDirection == TimerDirection.LeftToRight;
 
         }
 
