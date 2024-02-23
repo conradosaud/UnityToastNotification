@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Controle da mensagem que é criada dentro de ToastNotification da Hierarquia.
+/// É possível acessar os controles desta classe, mas não é recomendável, pois ela é manipulada diretamente
+/// pela classe ToastNotification.
+/// </summary>
 public class ToastNotificationMessage : MonoBehaviour
 {
     [HideInInspector]
@@ -11,12 +16,12 @@ public class ToastNotificationMessage : MonoBehaviour
     [HideInInspector]
     public bool leftToRight = true;
 
-    private float initialWidth; // Largura inicial do timer
+    private float initialWidth;
     float timeElapsed;
 
     void Start()
     {
-        messageTime = messageTime <= 0 ? ToastNotification.minimumMessageTime : messageTime;
+        messageTime = messageTime <= -1 ? ToastNotification.minimumMessageTime : messageTime;
 
         RectTransform messageRect = transform.parent.GetComponent<RectTransform>();
         timerRectTransform.sizeDelta = new Vector2(messageRect.sizeDelta.x, messageRect.sizeDelta.y * 0.07f );
@@ -35,13 +40,16 @@ public class ToastNotificationMessage : MonoBehaviour
         if (ToastNotification.isStoped == true)
             return;
 
-        // Inifite message
+        // For inifite messages
         if( messageTime != 0)
         {
             if (timeElapsed > messageTime)
-                ToastNotification.isHiding = true;
-                //ToastNotification.Hide();
-        
+            {
+                if (ToastNotification.isCanvasGroup)
+                    ToastNotification.isHiding = true;
+                else
+                    ToastNotification.Hide();
+            }
 
             timeElapsed += Time.deltaTime;
 

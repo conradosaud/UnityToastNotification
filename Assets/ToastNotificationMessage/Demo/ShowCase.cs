@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Hey! If you use this code, you can invoke ToastNotification just writing Show instead ToastNotification.Show ^_~
+/****************************************************
+// Hey! If you use this code bellow, you can invoke ToastNotification just writing Show instead ToastNotification.Show ^_~
+
 using static ToastNotification;
+
+/**************************************************** */
 
 public class ShowCase : MonoBehaviour
 {
@@ -15,16 +19,23 @@ public class ShowCase : MonoBehaviour
         // Anywhere you want, just call ToastNotification.Show :D
         if( Input.GetKeyDown( KeyCode.V ))
         {
-            ToastNotification.Show("Yeah, a simple Key can display a message. And this message doens't have a \"timer\" display", 5);
+            ToastNotification.Show("Yeah, a simple Key can display a message. And this message doens't have a \"timer\" display render", 10);
+        }
+
+        // You can setup a key/function/event/everthing to hide messages on screen. Very useful with infinite messages.
+        // Example use case: "Press E to get into the car", after pressing the key, the message disappears
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            ToastNotification.Hide();
         }
     }
 
 
     /* Welcome to Toast Notification! */
 
-    public void ShowMessageDefault()
+public void ShowMessageDefault()
     {
-        ToastNotification.Show("Hey there! How do you like this message? Pretty cool, huh?", 3, "info");
+        ToastNotification.Show("Hey there! How do you like this message? Pretty cool, huh?", 3, "success");
     }
     public void ShowMessageWhitoutIcon()
     {
@@ -32,7 +43,7 @@ public class ShowCase : MonoBehaviour
     }
     public void ShowMessageWithoutTimer()
     {
-        ToastNotification.Show("If the timer hits zero, this message will be infinite... or until you click to close it", 0, "success" );
+        ToastNotification.Show("If the timer hits zero, this message will be infinite... click to close it or press Z key", 0, "info" );
     }
 
     /* Custom Messages Secene */
@@ -52,7 +63,7 @@ public class ShowCase : MonoBehaviour
     {
         ToastNotification.messageScreenPosition = ToastNotification.MessageScreenPosition.BottomRight;
         ToastNotification.darkTheme = true;
-        ToastNotification.Show("And remember, if the messages start talking back to you, it might be time for a coffee break!");
+        ToastNotification.Show("If the messages start talking back to you, it might be time for a coffee break XD");
     }
 
     /* Scene manager */
